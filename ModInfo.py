@@ -1,4 +1,5 @@
 import os
+
 from PySide6.QtCore import QFileInfo, QDir
 
 class ModInfo(QFileInfo):
