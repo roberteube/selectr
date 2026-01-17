@@ -1,0 +1,3 @@
+- fix search by name and tag
+- enable renaming in context menu
+- nsfw logic (emergency button, merged navigation, nsfw tag)
