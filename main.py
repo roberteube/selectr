@@ -462,13 +462,53 @@ class FileManager(QMainWindow):
         except Exception:
             pass
 
-        # Splitter
-        splitter = QSplitter()
+    
+        splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(self.tree)
         splitter.addWidget(self.list)
         
+        # Toolbar
+        
+        toolbar = QToolBar()
+        # self.addToolBar(toolbar)
+
+
+        back_action = QAction("Back", self)
+        back_action.triggered.connect(self.go_up)
+        toolbar.addAction(back_action)
+
+        refresh_action = QAction("Refresh", self)
+        refresh_action.triggered.connect(self.refresh)
+        toolbar.addAction(refresh_action)
+
+        new_folder_action = QAction("New Folder", self)
+        new_folder_action.triggered.connect(self.create_folder)
+        toolbar.addAction(new_folder_action)
+
+        open_action = QAction("Open", self)
+        open_action.triggered.connect(self.open_selected)
+        toolbar.addAction(open_action)
+
+        
+        toolbar.addSeparator()
+        self.search_edit = QLineEdit()
+        self.search_edit.setPlaceholderText("Search by name or tag...")
+        self.search_edit.setMaximumWidth(200)
+        self.search_edit.textChanged.connect(self.on_search_text_changed)
+        toolbar.addWidget(self.search_edit)
+
+
+        self.path_edit = QLineEdit()
+        self.path_edit.setPlaceholderText("Path")
+        self.path_edit.returnPressed.connect(self.goto_path)
+
+        left_container = QSplitter(Qt.Vertical)
+        left_container.addWidget(toolbar)
+        left_container.addWidget(self.path_edit)
+        left_container.addWidget(splitter)
+
+        
         # Second independent file explorer on the right
-        right_widget = QSplitter(Qt.Vertical)
         
         # Right view toolbar
         right_toolbar = QToolBar()
@@ -491,7 +531,6 @@ class FileManager(QMainWindow):
         right_toolbar.addSeparator()
         self.right_path_edit = QLineEdit()
         self.right_path_edit.returnPressed.connect(self.right_goto_path)
-        right_toolbar.addWidget(self.right_path_edit)
         
         # Right view list
         self.right_file_model = QFileSystemModel()
@@ -540,13 +579,16 @@ class FileManager(QMainWindow):
         # Create right side container with toolbar and list
         right_container = QSplitter(Qt.Vertical)
         right_container.addWidget(right_toolbar)
+        right_container.addWidget(self.right_path_edit)
         right_container.addWidget(self.right_list)
-        right_container.setSizes([30, 570])
-        
-        splitter.addWidget(right_container)
-        splitter.setStretchFactor(1, 1)
-        splitter.setStretchFactor(2, 1)
-        self.setCentralWidget(splitter)
+        # right_container.setSizes([30, 570])
+
+        main_splitter = QSplitter(Qt.Horizontal)
+        main_splitter.addWidget(left_container)
+        main_splitter.addWidget(right_container)
+        # main_splitter.setStretchFactor(1, 1)
+        # main_splitter.setStretchFactor(2, 1)
+        self.setCentralWidget(main_splitter)
         
         # Set right view initial path
         self.right_set_path(os.path.sep.join((root_path,".wip/.unzipzone")))
@@ -571,38 +613,7 @@ class FileManager(QMainWindow):
         self.list.viewport().installEventFilter(self)
         self.tree.viewport().installEventFilter(self)
 
-        # Toolbar
-        toolbar = QToolBar()
-        self.addToolBar(toolbar)
-
-        back_action = QAction("Back", self)
-        back_action.triggered.connect(self.go_up)
-        toolbar.addAction(back_action)
-
-        refresh_action = QAction("Refresh", self)
-        refresh_action.triggered.connect(self.refresh)
-        toolbar.addAction(refresh_action)
-
-        new_folder_action = QAction("New Folder", self)
-        new_folder_action.triggered.connect(self.create_folder)
-        toolbar.addAction(new_folder_action)
-
-        open_action = QAction("Open", self)
-        open_action.triggered.connect(self.open_selected)
-        toolbar.addAction(open_action)
-
-        toolbar.addSeparator()
-        self.path_edit = QLineEdit()
-        self.path_edit.setPlaceholderText("Path")
-        self.path_edit.returnPressed.connect(self.goto_path)
-        toolbar.addWidget(self.path_edit)
         
-        toolbar.addSeparator()
-        self.search_edit = QLineEdit()
-        self.search_edit.setPlaceholderText("Search by name or tag...")
-        self.search_edit.setMaximumWidth(200)
-        self.search_edit.textChanged.connect(self.on_search_text_changed)
-        toolbar.addWidget(self.search_edit)
 
         # Connections
         self.tree.selectionModel().currentChanged.connect(self.on_tree_selection_changed)
